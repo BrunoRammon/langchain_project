@@ -1,0 +1,23 @@
+[project]
+name = "langchain-project"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "gspread",
+    "workalendar",
+    "pandas",
+    "holidays",
+    "requests",
+    "oauth2client",
+    "numpy",
+    "openai",
+    "langchain",
+    "langchain-community",
+    "langchain-openai",
+    "langchain-community",
+    "python-dotenv",
+    "fastapi>=0.115.12",
+    "uvicorn>=0.34.2",
+]

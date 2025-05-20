@@ -1,0 +1,56 @@
+secrets/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+.eggs/
+dist/
+build/
+sdist/
+*.egg-info/
+*.deb
+*.rpm
+*.exe
+*.msi
+*.whl
+
+# Environments
+.venv
+venv/
+env/
+ENV/
+
+# PyInstaller
+#  Usually these files are built in a _MEI folder, but it can be overridden.
+#  Even if it is overridden, the default location should be added as well.
+_MEI/
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+*.coverage
+.cache
+nosetests.xml
+*.log
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.sock
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# VS Code
+.vscode/
+
+# PyCharm
+.idea/
+
+# OS or Editor-specific files
+.DS_Store
+Thumbs.db
