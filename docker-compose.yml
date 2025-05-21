@@ -1,0 +1,14 @@
+services:
+  agent-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./secrets/.env
+    environment:
+      # You can override or define inline too
+      ENVIRONMENT: production
+    volumes:
+      - ./secrets/dragon-learning-460422-0927fe881fed.json:/app/secrets/dragon-learning-460422-0927fe881fed.json
