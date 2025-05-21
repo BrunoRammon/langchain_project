@@ -11,7 +11,7 @@ class Requisicao(BaseModel):
 @app.post("/agent/")
 def executar_agente(req: Requisicao):
     try:
-        resposta = agente.run(req.pergunta)
-        return {"resposta": resposta}
+        resposta = agente.invoke({"input": req.pergunta})
+        return {"resposta": resposta["output"]}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

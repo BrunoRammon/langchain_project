@@ -1,13 +1,13 @@
 import os
 from langchain.agents import AgentType, initialize_agent
 from langchain_openai import ChatOpenAI
-from langchain.tools import tool, StructuredTool
+from langchain.tools import StructuredTool
 from langchain.memory import ConversationBufferMemory
+from langchain.agents import AgentExecutor, create_openai_functions_agent
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from datetime import datetime
 from pydantic import BaseModel, Field
 from typing import Optional
-from langchain.chains import LLMChain
-import json
 from dotenv import load_dotenv
 from src.register import buscar_dados_organograma, calcular_dias_uteis, send_forms
 from src.prompts import EXTRACTOR_PROMPT
@@ -28,7 +28,7 @@ def solicitar_ferias(data_saida: str, data_retorno: str, email: str,
     Args:
         data_saida: string no formato YYYY-MM-DD com a data do início das férias.
         data_retorno: string no formato YYYY-MM-DD com a data do retorno das férias.
-        email: endereço de email do solicitante.
+        email: endereço de email do solicitante. Lembre-se de pedir essa informação ao usuário.
         observacoes: parametro opcional
 
     Returns:
@@ -116,6 +116,15 @@ def consultar_dias_uteis(data_inicio: str, data_fim: str) -> str:
     dias = calcular_dias_uteis(data_inicio, data_fim)
     return f"Entre {data_inicio} e {data_fim} há {dias} dias úteis."
 
+def consultar_ano_atual()-> str:
+    """
+    Consulta e retorna o ano atual. Essa ferramenta deve ser usada quando o ano não for citado 
+    diretamente na solicitação das férias.
+    """
+    current_year = datetime.now().strftime('%Y')
+    return f"O ano atual é {current_year}"
+
+
 def criar_agente(agent_type=AgentType.OPENAI_FUNCTIONS):
     llm = ChatOpenAI(temperature=0, model=AGENT_MODEL, api_key=OPENAI_API_KEY)
     memory = ConversationBufferMemory(memory_key="chat_history")
@@ -135,46 +144,58 @@ def criar_agente(agent_type=AgentType.OPENAI_FUNCTIONS):
         parse_docstring=True,
         description="Calcula a quantidade de dias úteis entre duas datas"
     )
+    tool_current_year = StructuredTool.from_function(
+        func=consultar_ano_atual,
+        parse_docstring=True,
+        description="Consulta o ano atual."
+    )
     return initialize_agent(
         agent = agent_type,
-        tools=[tool_sol_ferias,tool_can_ferias,tool_dias_uteis],
+        tools=[tool_sol_ferias, tool_can_ferias, tool_dias_uteis, tool_current_year],
         llm=llm,
         verbose=True,
         memory=memory
     )
 
-# # 1. Slots a serem preenchidos
-# slots = {
-#     "data_inicio": None,
-#     "data_fim": None,
-#     "email": None
-# }
-# # 4. Configurações
-# def create_extractor_chain():
-#     llm = ChatOpenAI(temperature=0, model=AGENT_MODEL, api_key=OPENAI_API_KEY)
-#     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
-#     extrator_chain = LLMChain(llm=llm, prompt=EXTRACTOR_PROMPT)
-#     return extrator_chain
+def criar_agente():
+    llm = ChatOpenAI(temperature=0, model="gpt-4.1-nano", api_key=OPENAI_API_KEY)
+    # tools = FeriasTools()
+    memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+    tools = [
+        StructuredTool.from_function(
+            func=solicitar_ferias,
+            parse_docstring=True,
+            description="Registra uma solicitação de férias."
+        ),
+        StructuredTool.from_function(
+            func=cancelar_ferias,
+            parse_docstring=True,
+            # args_schema=CancelarFeriasInput,
+            description="Cancela uma solicitação de férias realizada anteriormente."
+        ),
+        StructuredTool.from_function(
+            func=consultar_dias_uteis,
+            parse_docstring=True,
+            description="Calcula a quantidade de dias úteis entre duas datas"
+        ),
+        StructuredTool.from_function(
+            func=consultar_ano_atual,
+            parse_docstring=True,
+            description="Consulta o ano atual."
+        ),
+    ]
+    
 
-# extrator_chain = create_extractor_chain()
-# def atualizar_slots(memory):
-#     historico = "\n".join([f"{m.type.upper()}: {m.content}" for m in memory.chat_memory.messages])
-#     resposta = extrator_chain.run(historico)
-#     try:
-#         dados = json.loads(resposta)
-#         for k in slots:
-#             if dados.get(k) and not slots[k]:
-#                 slots[k] = dados[k]
-#     except Exception as e:
-#         print("Erro ao extrair dados:", e)
-#         print("Resposta recebida:", resposta)
-
-# def query_agent(entrada_usuario, agent):
-#     resposta = agent(entrada_usuario)
-#     atualizar_slots(agent.memory)
-#     if all(slots.values()):
-#         return solicitar_ferias(**slots)
-#     return resposta
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            ("system", "Você é um assistente que gerencia solicitações de recesso"),
+            MessagesPlaceholder("chat_history", optional=True),
+            ("human", "{input}"),
+            MessagesPlaceholder("agent_scratchpad"),
+        ]
+    )
+    agent = create_openai_functions_agent(llm, tools, prompt)
+    return AgentExecutor(agent=agent, tools=tools, verbose=True, memory=memory)
 
 if __name__ == "__main__":
     print(AGENT_MODEL)

@@ -1,0 +1,34 @@
+curl -X POST http://localhost:8000/agent/ \
+  -H "Content-Type: application/json" \
+  -d '{"pergunta": "Quero solicitar férias de 2025-07-01 a 2025-08-01. Meu e-mail é bruno.souza@datarisk.io"}'
+
+curl -X POST http://localhost:8000/agent/ \
+  -H "Content-Type: application/json" \
+  -d '{"pergunta": "Quero solicitar férias de 01/07/2025 a 01/08/2025. Meu e-mail é bruno.souza@datarisk.io"}'
+
+curl -X POST http://localhost:8000/agent/ \
+  -H "Content-Type: application/json" \
+  -d '{"pergunta": "Quero solicitar férias de primeiro de julho a primeiro de agosto desse ano. Meu e-mail é bruno.souza@datarisk.io"}'
+
+curl -X POST http://localhost:8000/agent/ \
+  -H "Content-Type: application/json" \
+  -d '{"pergunta": "Quero solicitar cancelamento de férias. Meu e-mail é bruno.souza@datarisk.io"}'
+
+curl -X POST http://localhost:8000/agent/ \
+  -H "Content-Type: application/json" \
+  -d '{"pergunta": "O que preciso fazer para solicitar recesso?"}'
+
+curl -X POST http://localhost:8000/agent/ \
+  -H "Content-Type: application/json" \
+  -d '{"pergunta": "Eu quero marcar meu recesso. O que eu devo fazer?"}'
+
+# passando informações por partes
+curl -X POST http://localhost:8000/agent/ \
+  -H "Content-Type: application/json" \
+  -d '{"pergunta": "A data de inicio do meu recesso é 2025-07-29"}'
+curl -X POST http://localhost:8000/agent/ \
+  -H "Content-Type: application/json" \
+  -d '{"pergunta": "A data de retorno do meu recesso é dia 2025-08-20."}'
+curl -X POST http://localhost:8000/agent/ \
+  -H "Content-Type: application/json" \
+  -d '{"pergunta": "Meu endereço de email é bruno.souza@datarisk.io"}'
