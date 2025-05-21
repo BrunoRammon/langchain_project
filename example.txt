@@ -16,6 +16,10 @@ curl -X POST http://localhost:8000/agent/ \
 
 curl -X POST http://localhost:8000/agent/ \
   -H "Content-Type: application/json" \
+  -d '{"pergunta": "Eu não quero justificar, apenas cancele o meu recesso."}'
+
+curl -X POST http://localhost:8000/agent/ \
+  -H "Content-Type: application/json" \
   -d '{"pergunta": "O que preciso fazer para solicitar recesso?"}'
 
 curl -X POST http://localhost:8000/agent/ \
